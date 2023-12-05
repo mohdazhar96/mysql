@@ -1,0 +1,60 @@
+etting up Master/Slave replication involves configuring the Master server first, then adjusting the Slave server to connect remotely. Here's a simplified guide:
+
+    Master Server Configuration:
+        Open the configuration file at /etc/mysql/mysql.conf.d/mysqld.cnf.
+        Add the following settings:
+            server-id = 1
+            log_bin = /var/log/mysql/mysql-bin.log
+            expire_logs_days = 10
+            max_binlog_size = 100M
+        Allow external connections by changing bind-address to 0.0.0.0.
+        Restart the MySQL service with $ sudo service mysql restart.
+
+    Create Test Database on Master:
+        Open MySQL with $ sudo mysql -u root -p.
+        Execute the following commands:
+            CREATE DATABASE tutorial;
+            USE tutorial;
+            CREATE TABLE numbers (value REAL);
+            INSERT INTO numbers VALUES (1), (2), (3);
+        Verify the data with SELECT * FROM numbers;.
+
+    Create Slave User:
+        Still in MySQL, execute:
+            GRANT REPLICATION SLAVE ON *.* TO 'usr_replica'@'%' IDENTIFIED BY 'SMDipmf#23$42';
+            FLUSH PRIVILEGES;
+        Note: These are access credentials for the Slave.
+
+    Get Master Status:
+        Still in MySQL, run SHOW MASTER STATUS;.
+        Save the displayed information; you'll need it for Slave configuration.
+      example: information will be displayed in this format
+                                File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
+	
+	                             +------------------+----------+--------------+------------------+-------------------+
+	
+	                             | mysql-bin.000001 |     1238 
+        Exit MySQL with exit.
+
+    Backup Master Database:
+        Create a dump with $ sudo mysqldump -u root -p --opt tutorial > slave-init.sql.
+        Transfer this file to the Slave machine.
+
+    Slave Server Configuration:
+        On the Slave, edit the configuration file at /etc/mysql/mysql.conf.d/mysqld.cnf.
+        Change server-id to 2 and set bind-address to 0.0.0.0.
+        Restart MySQL with $ sudo service mysql restart.
+
+    Create Database on Slave:
+        Open MySQL with $ sudo mysql -u root -p.
+        Execute:
+            CREATE DATABASE tutorial;
+            exit.
+
+    Import Backup and Start Replication:
+        Run $ sudo mysql -u root tutorial < /root/slave.sql.
+        Open MySQL again and execute:
+            CHANGE MASTER TO MASTER_HOST='195.231.4.201', MASTER_USER='usr_replica', MASTER_PASSWORD='SMDipmf#23$42', MASTER_LOG_FILE='mysql-bin.000001', MASTER_LOG_POS=1238;
+            START SLAVE;
+
+Now, the databases are synchronized in real time, and you can exit the MySQL shell.
