@@ -1,4 +1,4 @@
-etting up Master/Slave replication involves configuring the Master server first, then adjusting the Slave server to connect remotely. Here's a simplified guide:
+Setting up Master/Slave replication involves configuring the Master server first, then adjusting the Slave server to connect remotely. Here's a simplified guide:
 
     Master Server Configuration:
         Open the configuration file at /etc/mysql/mysql.conf.d/mysqld.cnf.
@@ -58,3 +58,5 @@ etting up Master/Slave replication involves configuring the Master server first,
             START SLAVE;
 
 Now, the databases are synchronized in real time, and you can exit the MySQL shell.
+
+Reference: https://www.arubacloud.com/tutorial/how-to-configure-a-mysql-slave-database.aspx
